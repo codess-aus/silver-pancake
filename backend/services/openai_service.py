@@ -8,7 +8,7 @@ Enterprise Best Practice: Always log API calls for audit trails and debugging.
 import logging
 from typing import Dict, Any
 from openai import AzureOpenAI
-from ..config import settings
+from config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +23,7 @@ class OpenAIService:
             api_version=settings.azure_openai_api_version,
             azure_endpoint=settings.azure_openai_endpoint
         )
-        self.deployment_name = settings.azure_openai_deployment_name
+        self.deployment_name = settings.azure_openai_text_deployment_name
     
     async def generate_meme_text(self, topic: str, mood: str = "funny") -> Dict[str, Any]:
         """
@@ -49,6 +49,8 @@ class OpenAIService:
             user_prompt = f"Create a {mood} meme about: {topic}"
             
             logger.info(f"Generating meme for topic: {topic}, mood: {mood}")
+            logger.info(f"Using deployment: {self.deployment_name}")
+            logger.info(f"Using endpoint: {settings.azure_openai_endpoint}")
             
             response = self.client.chat.completions.create(
                 model=self.deployment_name,
@@ -74,6 +76,8 @@ class OpenAIService:
             
         except Exception as e:
             logger.error(f"Error generating meme text: {str(e)}")
+            logger.error(f"Deployment name used: {self.deployment_name}")
+            logger.error(f"Endpoint used: {settings.azure_openai_endpoint}")
             raise Exception(f"Failed to generate meme: {str(e)}")
     
     async def generate_meme_suggestion(self, topic: str) -> Dict[str, str]:

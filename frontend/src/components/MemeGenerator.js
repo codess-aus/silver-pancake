@@ -32,15 +32,17 @@ const MemeGenerator = ({ onMemeGenerated, onError, isLoading, setIsLoading }) =>
     setIsLoading(true);
     
     try {
-      const response = await axios.post('/api/generate-meme', {
+      const response = await axios.post('/api/generate-visual-meme', {
         topic: topic.trim(),
-        mood: mood
+        mood: mood,
+        include_image: true,
+        include_text: true
       });
 
-      if (response.data.success && response.data.is_safe) {
+      if (response.data.success) {
         onMemeGenerated(response.data);
       } else {
-        onError(response.data.message || 'Content did not pass safety checks');
+        onError(response.data.message || 'Failed to generate meme');
       }
     } catch (error) {
       console.error('Error generating meme:', error);

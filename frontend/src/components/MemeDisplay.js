@@ -2,54 +2,59 @@
  * MemeDisplay Component
  * Shows the generated meme in a visually appealing format
  * 
- * Design: Classic meme format with top/bottom text overlay
+ * Design: Modern visual meme display with Azure OpenAI image generation
  */
 
 import React from 'react';
 import './MemeDisplay.css';
 
 const MemeDisplay = ({ meme }) => {
-  if (!meme) return null;
+  if (!meme || !meme.meme_components) return null;
+  const { visual, text } = meme.meme_components;
 
   return (
     <div className="meme-display">
       <h3>🎉 Your Meme is Ready!</h3>
       
-      {/* Classic Meme Format Display */}
+      {/* Visual Meme Display */}
       <div className="meme-frame">
-        <div className="meme-image-placeholder">
-          <div className="meme-text-overlay">
-            {meme.top_text && (
-              <div className="meme-text meme-text-top">
-                {meme.top_text}
-              </div>
-            )}
-            {meme.bottom_text && (
-              <div className="meme-text meme-text-bottom">
-                {meme.bottom_text}
-              </div>
-            )}
-          </div>
+        <div className="meme-image-container">
+          {visual?.image_url ? (
+            <img 
+              src={visual.image_url} 
+              alt={`Meme about ${meme.topic}`}
+              className="meme-image"
+            />
+          ) : (
+            <div className="image-placeholder">
+              <span className="placeholder-icon">🎨</span>
+              <p>Generating your meme image...</p>
+              <small>Using Azure OpenAI image generation</small>
+            </div>
+          )}
           
-          {/* Generic meme image placeholder */}
-          <div className="image-placeholder">
-            <span className="placeholder-icon">🖼️</span>
-            <p>Your meme image would go here!</p>
-            <small>
-              In a full implementation, you'd use Azure OpenAI DALL-E 
-              or stock meme templates
-            </small>
-          </div>
+          {text && (
+            <div className="meme-text-overlay">
+              <div className="meme-text meme-text-top">
+                {text.top_text}
+              </div>
+              <div className="meme-text meme-text-bottom">
+                {text.bottom_text}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Alternative text format display */}
-      <div className="meme-text-format">
-        <h4>Generated Meme Text:</h4>
-        <div className="meme-content">
-          {meme.meme_text}
+      {/* Text Component Display */}
+      {text && (
+        <div className="meme-text-format">
+          <h4>Generated Meme Text:</h4>
+          <div className="meme-content">
+            {text.text}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Metadata */}
       <div className="meme-metadata">
@@ -59,13 +64,18 @@ const MemeDisplay = ({ meme }) => {
         <div className="metadata-item">
           <strong>Mood:</strong> {meme.mood}
         </div>
-        <div className="metadata-item safety-check">
-          <strong>Safety Check:</strong> 
-          <span className="safety-status passed">✓ Passed</span>
-        </div>
+        {visual && (
+          <div className="metadata-item image-info">
+            <strong>Image Status:</strong>
+            {visual.image_url ? (
+              <span className="status success">✓ Generated</span>
+            ) : (
+              <span className="status pending">⏳ Processing</span>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
 };
-
 export default MemeDisplay;

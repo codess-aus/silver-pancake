@@ -11,7 +11,7 @@ from typing import Dict, Any, Tuple
 from azure.ai.contentsafety import ContentSafetyClient
 from azure.core.credentials import AzureKeyCredential
 from azure.ai.contentsafety.models import AnalyzeTextOptions
-from ..config import settings
+from config import settings
 
 logger = logging.getLogger(__name__)
 

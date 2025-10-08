@@ -16,7 +16,8 @@ class Settings(BaseSettings):
     # Azure OpenAI
     azure_openai_endpoint: str
     azure_openai_api_key: str
-    azure_openai_deployment_name: str = "gpt-4"
+    azure_openai_text_deployment_name: str = "gpt-4o-mini"
+    azure_openai_image_deployment_name: str = "gpt-image-1"
     azure_openai_api_version: str = "2024-02-15-preview"
     
     # Azure Content Safety
