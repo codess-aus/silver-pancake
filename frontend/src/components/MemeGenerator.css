@@ -1,0 +1,126 @@
+/* MemeGenerator Component Styles */
+
+.meme-generator {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 15px;
+  padding: 2rem;
+  margin: 2rem 0;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.meme-generator h2 {
+  margin: 0 0 1.5rem 0;
+  color: white;
+  font-size: 1.8rem;
+}
+
+.generator-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-group {
+  text-align: left;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+  color: white;
+  font-size: 1.1rem;
+}
+
+.topic-input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  font-size: 1rem;
+  background: rgba(255, 255, 255, 0.9);
+  color: #333;
+  box-sizing: border-box;
+  transition: border-color 0.3s ease;
+}
+
+.topic-input:focus {
+  outline: none;
+  border-color: #2196F3;
+  box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.3);
+}
+
+.mood-select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  font-size: 1rem;
+  background: rgba(255, 255, 255, 0.9);
+  color: #333;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+
+.mood-select:focus {
+  outline: none;
+  border-color: #2196F3;
+  box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.3);
+}
+
+.help-text {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+  margin-top: 0.3rem;
+  display: block;
+}
+
+.generate-btn {
+  margin-top: 1rem;
+  font-size: 1.1rem;
+  padding: 1rem 2rem;
+  min-height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.safety-notice {
+  margin-top: 2rem;
+  background: rgba(76, 175, 80, 0.2);
+  padding: 1rem;
+  border-radius: 10px;
+  border-left: 4px solid #4CAF50;
+}
+
+.safety-notice h4 {
+  margin: 0 0 0.5rem 0;
+  color: #81C784;
+  font-size: 1.1rem;
+}
+
+.safety-notice p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.4;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .meme-generator {
+    padding: 1.5rem;
+    margin: 1rem 0;
+  }
+  
+  .meme-generator h2 {
+    font-size: 1.5rem;
+  }
+  
+  .generate-btn {
+    font-size: 1rem;
+    padding: 0.8rem 1.5rem;
+  }
+}

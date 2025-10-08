@@ -1,29 +1,196 @@
 """
-FastAPI backend for Silver Pancake
-Context: This API will serve as the bridge between your frontend and Azure/OpenAI services.
-Interesting Fact: FastAPI automatically generates interactive API docs at /docs!
+FastAPI backend for Silver Pancake - AI Meme Generator with Responsible AI
+Context: This API orchestrates meme generation using Azure OpenAI with 
+enterprise-grade content safety and moderation.
 
+Interesting Fact: FastAPI automatically generates interactive API docs at /docs!
 """
 
-from fastapi import FastAPI
+import logging
+from fastapi import FastAPI, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel, Field
+from typing import Optional, Dict, Any
+from contextlib import asynccontextmanager
 
-app = FastAPI()
+from config import settings
+from services.openai_service import OpenAIService
+from services.content_safety_service import ContentSafetyService
 
-# Enable CORS for frontend-backend communication during development.
-# Note: In production, restrict origins for security!
+# Configure logging
+logging.basicConfig(
+    level=getattr(logging, settings.log_level),
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
+
+# Request/Response Models
+class MemeRequest(BaseModel):
+    """Request model for meme generation."""
+    topic: str = Field(..., min_length=1, max_length=200, description="Topic for the meme")
+    mood: str = Field(default="funny", description="Mood/tone of the meme")
+
+
+class MemeResponse(BaseModel):
+    """Response model for generated meme."""
+    success: bool
+    meme_text: Optional[str] = None
+    top_text: Optional[str] = None
+    bottom_text: Optional[str] = None
+    topic: str
+    mood: str
+    is_safe: bool
+    safety_analysis: Optional[Dict[str, Any]] = None
+    message: Optional[str] = None
+
+
+class FeedbackRequest(BaseModel):
+    """Request model for user feedback on generated memes."""
+    meme_text: str
+    reason: str = Field(..., description="Reason for flagging")
+    user_comment: Optional[str] = None
+
+
+# Lifespan context manager
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Initialize services on startup."""
+    logger.info("Starting Silver Pancake API...")
+    app.state.openai_service = OpenAIService()
+    app.state.content_safety_service = ContentSafetyService()
+    logger.info("Services initialized successfully")
+    yield
+    logger.info("Shutting down Silver Pancake API...")
+
+
+# Initialize FastAPI app
+app = FastAPI(
+    title="Silver Pancake API",
+    description="AI Meme Generator with Responsible AI and Content Safety",
+    version="1.0.0",
+    lifespan=lifespan
+)
+
+# Enable CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # For development only; specify domains in production!
+    allow_origins=settings.cors_origins_list,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+
 @app.get("/")
 def read_root():
     """
     Root endpoint for health checks.
-    Returns a welcome message.
+    Returns API information and status.
     """
-    return {"message": "Welcome to Silver Pancake FastAPI backend!"}
+    return {
+        "message": "Welcome to Silver Pancake API!",
+        "version": "1.0.0",
+        "docs": "/docs",
+        "status": "healthy"
+    }
+
+
+@app.get("/health")
+def health_check():
+    """Health check endpoint for monitoring."""
+    return {"status": "healthy", "environment": settings.environment}
+
+
+@app.post("/api/generate-meme", response_model=MemeResponse)
+async def generate_meme(request: MemeRequest):
+    """
+    Generate a meme with content safety checks.
+    
+    This endpoint:
+    1. Generates meme text using Azure OpenAI
+    2. Analyzes content with Azure Content Safety
+    3. Returns the meme only if it passes safety checks
+    
+    Responsible AI: All content is moderated before being returned to users.
+    """
+    try:
+        logger.info(f"Meme generation requested - Topic: {request.topic}, Mood: {request.mood}")
+        
+        # Generate meme text
+        openai_service = app.state.openai_service
+        meme_data = await openai_service.generate_meme_text(request.topic, request.mood)
+        
+        # Generate structured meme format
+        meme_suggestion = await openai_service.generate_meme_suggestion(request.topic)
+        
+        # Content safety check
+        content_safety_service = app.state.content_safety_service
+        is_safe, safety_results = await content_safety_service.analyze_text(meme_data["text"])
+        
+        if not is_safe:
+            # Log flagged content for evaluation
+            content_safety_service.log_flagged_content(meme_data["text"], safety_results)
+            
+            return MemeResponse(
+                success=False,
+                topic=request.topic,
+                mood=request.mood,
+                is_safe=False,
+                safety_analysis=safety_results,
+                message="Content did not pass safety checks. Please try a different topic."
+            )
+        
+        # Return safe content
+        return MemeResponse(
+            success=True,
+            meme_text=meme_data["text"],
+            top_text=meme_suggestion["top_text"],
+            bottom_text=meme_suggestion["bottom_text"],
+            topic=request.topic,
+            mood=request.mood,
+            is_safe=True,
+            safety_analysis=safety_results,
+            message="Meme generated successfully!"
+        )
+        
+    except Exception as e:
+        logger.error(f"Error in meme generation: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to generate meme: {str(e)}"
+        )
+
+
+@app.post("/api/feedback")
+async def submit_feedback(feedback: FeedbackRequest, background_tasks: BackgroundTasks):
+    """
+    Submit feedback on a generated meme.
+    
+    Allows users to flag inappropriate content that passed initial checks.
+    This feedback is crucial for continuous model evaluation and improvement.
+    """
+    try:
+        logger.info(f"Feedback received - Reason: {feedback.reason}")
+        
+        # In production, store in database and trigger evaluation pipeline
+        background_tasks.add_task(log_feedback, feedback)
+        
+        return {
+            "success": True,
+            "message": "Thank you for your feedback. We'll review this content."
+        }
+        
+    except Exception as e:
+        logger.error(f"Error processing feedback: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to process feedback")
+
+
+def log_feedback(feedback: FeedbackRequest):
+    """Log user feedback for evaluation."""
+    logger.warning(
+        f"USER FEEDBACK - Reason: {feedback.reason}, "
+        f"Comment: {feedback.user_comment}, "
+        f"Meme: {feedback.meme_text[:100]}..."
+    )
+    # In production: Store in database, send to Application Insights, trigger review

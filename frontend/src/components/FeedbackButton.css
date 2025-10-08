@@ -1,0 +1,189 @@
+/* FeedbackButton Component Styles */
+
+.feedback-container {
+  margin: 2rem 0;
+  text-align: center;
+}
+
+.feedback-trigger {
+  font-size: 0.9rem;
+  padding: 0.6rem 1.2rem;
+}
+
+.feedback-form-container {
+  background: rgba(255, 255, 255, 0.95);
+  color: #333;
+  border-radius: 12px;
+  padding: 2rem;
+  max-width: 500px;
+  margin: 1rem auto;
+  text-align: left;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.feedback-form-container h4 {
+  margin: 0 0 1rem 0;
+  color: #d32f2f;
+  font-size: 1.3rem;
+}
+
+.feedback-explanation {
+  margin: 0 0 1.5rem 0;
+  font-size: 0.95rem;
+  color: #666;
+  line-height: 1.4;
+}
+
+.feedback-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.8rem;
+  font-weight: bold;
+  color: #444;
+}
+
+.reason-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.reason-option {
+  display: flex;
+  align-items: center;
+  padding: 0.8rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.reason-option:hover {
+  border-color: #2196F3;
+  background: rgba(33, 150, 243, 0.05);
+}
+
+.reason-option input[type="radio"] {
+  margin-right: 0.8rem;
+  cursor: pointer;
+}
+
+.reason-option input[type="radio"]:checked + .reason-label {
+  color: #2196F3;
+  font-weight: bold;
+}
+
+.reason-label {
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.comment-textarea {
+  width: 100%;
+  padding: 0.8rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 80px;
+  box-sizing: border-box;
+  transition: border-color 0.3s ease;
+}
+
+.comment-textarea:focus {
+  outline: none;
+  border-color: #2196F3;
+  box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+}
+
+.char-count {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  color: #888;
+  text-align: right;
+}
+
+.feedback-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+.feedback-actions .btn {
+  padding: 0.7rem 1.5rem;
+  font-size: 0.95rem;
+}
+
+.feedback-success {
+  background: rgba(76, 175, 80, 0.9);
+  color: white;
+  padding: 2rem;
+  border-radius: 12px;
+  text-align: center;
+  animation: slideIn 0.5s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.success-icon {
+  font-size: 2rem;
+  display: block;
+  margin-bottom: 1rem;
+}
+
+.feedback-success p {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+
+.feedback-success small {
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.submitted {
+  margin: 1rem 0;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .feedback-form-container {
+    margin: 1rem;
+    padding: 1.5rem;
+  }
+  
+  .feedback-actions {
+    flex-direction: column-reverse;
+  }
+  
+  .feedback-actions .btn {
+    width: 100%;
+  }
+  
+  .reason-options {
+    gap: 0.6rem;
+  }
+  
+  .reason-option {
+    padding: 0.6rem;
+  }
+}
