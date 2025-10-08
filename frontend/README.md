@@ -1,6 +1,5 @@
 # Silver Pancake Frontend
 
-Welcome, Master Chief Sparkle!  
 This directory contains the React frontend for your Trustworthy Generative AI MVP demo.
 
 ## How to run locally
