@@ -10,6 +10,8 @@ from typing import Dict, Any, Optional
 from openai import AzureOpenAI
 from config import settings
 
+# Set up logging
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
@@ -18,13 +20,39 @@ class EnhancedMemeService:
     
     def __init__(self):
         """Initialize Azure OpenAI client for both text and image generation."""
-        self.client = AzureOpenAI(
-            api_key=settings.azure_openai_api_key,
-            api_version=settings.azure_openai_api_version,
-            azure_endpoint=settings.azure_openai_endpoint
-        )
-        self.text_deployment = settings.azure_openai_text_deployment_name
-        self.image_deployment = settings.azure_openai_image_deployment_name
+        try:
+            logger.info(f"Initializing Azure OpenAI client with:")
+            logger.info(f"- Endpoint: {settings.azure_openai_endpoint}")
+            logger.info(f"- API Version: {settings.azure_openai_api_version}")
+            logger.info(f"- Image Deployment: {settings.azure_openai_image_deployment_name}")
+            
+            # Initialize Azure OpenAI client with required configuration
+            # Set required environment variables
+            import os
+            os.environ["OPENAI_API_VERSION"] = settings.azure_openai_api_version
+            
+            # Format base_url correctly for Azure OpenAI
+            base_url = f"{settings.azure_openai_endpoint}/openai/v1"
+            if base_url.startswith("https://"):
+                base_url = base_url[8:]  # Remove https:// as it will be added by the SDK
+            
+            self.client = AzureOpenAI(
+                api_key=settings.azure_openai_api_key,
+                base_url=f"https://{base_url}/"
+            )
+            
+            self.text_deployment = settings.azure_openai_text_deployment_name
+            self.image_deployment = settings.azure_openai_image_deployment_name
+            
+            logger.info("Azure OpenAI client initialized successfully")
+            
+            # Skip model listing as it's not needed for image generation
+            logger.info("Client initialized - skipping model list check for image generation")
+                
+        except Exception as e:
+            logger.error(f"Failed to initialize Azure OpenAI client: {str(e)}")
+            logger.error(f"Full error details: {repr(e)}")
+            raise
     
     async def generate_visual_meme(self, topic: str, mood: str = "funny") -> Dict[str, Any]:
         """
@@ -41,19 +69,49 @@ class EnhancedMemeService:
             # Create a detailed prompt for meme image generation
             image_prompt = self._create_meme_image_prompt(topic, mood)
             
-            logger.info(f"Generating visual meme for topic: {topic}, mood: {mood}")
-            logger.info(f"Using image deployment: {self.image_deployment}")
+            logger.info(f"Azure OpenAI Configuration:")
+            logger.info(f"- Endpoint: {self.client.base_url}")
+            logger.info(f"- API Version: {self.client.api_version}")
+            logger.info(f"- Image Deployment: {self.image_deployment}")
+            logger.info(f"Generating visual meme - Topic: {topic}, Mood: {mood}")
+            logger.info(f"Image prompt: {image_prompt}")
             
             # Generate the meme image
-            response = self.client.images.generate(
-                model=self.image_deployment,
-                prompt=image_prompt,
-                size="1024x1024",
-                quality="high",
-                n=1
-            )
+            logger.info("Attempting to generate image with Azure OpenAI...")
+            logger.info(f"Generating image with deployment {self.image_deployment}")
+            logger.info(f"Using prompt: {image_prompt}")
             
+            try:
+                logger.info("Attempting image generation with parameters:")
+                logger.info(f"- Model: {self.image_deployment}")
+                logger.info(f"- Base URL: {self.client.base_url}")
+                logger.info(f"- Headers: {self.client.default_headers}")
+                
+                response = self.client.images.generate(
+                    model="gpt-image-1",  # Use model name directly
+                    prompt=image_prompt,
+                    n=1,
+                    size="1024x1024",  # Standard size for memes
+                    quality="high"  # GPT-image-1 uses high/medium/low
+                )
+                logger.info(f"Image generation response received: {response}")
+            except Exception as e:
+                logger.error(f"Image generation failed: {str(e)}")
+                logger.error(f"Full error details: {repr(e)}")
+                logger.error(f"Client configuration: {vars(self.client)}")
+                raise
+            
+            if not response or not response.data:
+                logger.error("No data in image generation response")
+                raise Exception("Empty response from image generation API")
+                
+            logger.info(f"Image generation succeeded, response data: {response.data}")
             image_url = response.data[0].url
+            if not image_url:
+                logger.error("Image URL is null in response")
+                raise Exception("No image URL in response")
+                
+            logger.info(f"Successfully generated image URL: {image_url}")
             
             logger.info("Visual meme generated successfully")
             
