@@ -9,6 +9,7 @@ import logging
 from typing import Dict, Any, Optional
 from openai import AzureOpenAI
 from config import settings
+from services.content_safety_service import ContentSafetyService
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -18,7 +19,7 @@ logger = logging.getLogger(__name__)
 class EnhancedMemeService:
     """Service for generating both text and visual memes using Azure OpenAI."""
     
-    def __init__(self):
+    def __init__(self, content_safety_service: Optional[ContentSafetyService] = None):
         """Initialize Azure OpenAI client for both text and image generation."""
         try:
             logger.info(f"Initializing Azure OpenAI client with:")
@@ -36,6 +37,9 @@ class EnhancedMemeService:
             
             self.text_deployment = settings.azure_openai_text_deployment_name
             self.image_deployment = settings.azure_openai_image_deployment_name
+            
+            # Initialize content safety service
+            self.content_safety_service = content_safety_service or ContentSafetyService()
             
             logger.info("Azure OpenAI client initialized successfully")
             
@@ -116,7 +120,23 @@ class EnhancedMemeService:
             
             logger.info(f"Successfully generated image (url length: {len(image_url) if image_url else 0})")
             
-            logger.info("Visual meme generated successfully")
+            # Perform content safety check on the generated image
+            logger.info("Performing content safety check on generated image...")
+            is_safe, safety_results = await self.content_safety_service.analyze_image(image_url)
+            
+            if not is_safe:
+                # Log flagged content
+                self.content_safety_service.log_flagged_content("", safety_results)
+                logger.warning(f"Generated image failed safety check: {safety_results}")
+                
+                # Return error with safety information
+                raise Exception(
+                    f"Generated image did not pass safety checks. "
+                    f"Category: {safety_results.get('flagged_category', 'unknown')}, "
+                    f"Severity: {safety_results.get('max_severity', 'N/A')}"
+                )
+            
+            logger.info("Visual meme generated successfully and passed safety checks")
             
             return {
                 "image_url": image_url,
@@ -124,7 +144,9 @@ class EnhancedMemeService:
                 "topic": topic,
                 "mood": mood,
                 "model": self.image_deployment,
-                "type": "visual_meme"
+                "type": "visual_meme",
+                "is_safe": True,
+                "safety_check": safety_results
             }
             
         except Exception as e:

@@ -68,8 +68,10 @@ async def lifespan(app: FastAPI):
     logger.info("Starting Silver Pancake API...")
     # app.state.openai_service = OpenAIService()  # Disabled - no text models deployed
     app.state.content_safety_service = ContentSafetyService()
-    app.state.enhanced_meme_service = EnhancedMemeService()
-    logger.info("Services initialized successfully")
+    app.state.enhanced_meme_service = EnhancedMemeService(
+        content_safety_service=app.state.content_safety_service
+    )
+    logger.info("Services initialized successfully with image content moderation")
     yield
     logger.info("Shutting down Silver Pancake API...")
 
@@ -254,10 +256,24 @@ async def generate_visual_meme(request: VisualMemeRequest):
             }
         
     except Exception as e:
-        logger.error(f"Error in visual meme generation: {str(e)}")
+        error_msg = str(e)
+        logger.error(f"Error in visual meme generation: {error_msg}")
+        
+        # Check if it's a content safety failure
+        if "did not pass safety checks" in error_msg or "safety check" in error_msg.lower():
+            raise HTTPException(
+                status_code=400,
+                detail={
+                    "error": "Content Safety Violation",
+                    "message": "The generated image did not pass content safety checks. Please try a different topic or mood.",
+                    "details": error_msg
+                }
+            )
+        
+        # Generic error
         raise HTTPException(
             status_code=500,
-            detail=f"Failed to generate visual meme: {str(e)}"
+            detail=f"Failed to generate visual meme: {error_msg}"
         )
 
 
