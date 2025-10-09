@@ -27,18 +27,11 @@ class EnhancedMemeService:
             logger.info(f"- Image Deployment: {settings.azure_openai_image_deployment_name}")
             
             # Initialize Azure OpenAI client with required configuration
-            # Set required environment variables
-            import os
-            os.environ["OPENAI_API_VERSION"] = settings.azure_openai_api_version
-            
-            # Format base_url correctly for Azure OpenAI
-            base_url = f"{settings.azure_openai_endpoint}/openai/v1"
-            if base_url.startswith("https://"):
-                base_url = base_url[8:]  # Remove https:// as it will be added by the SDK
-            
+            # For Azure OpenAI, use azure_endpoint (not base_url with /openai/v1)
             self.client = AzureOpenAI(
                 api_key=settings.azure_openai_api_key,
-                base_url=f"https://{base_url}/"
+                api_version=settings.azure_openai_api_version,
+                azure_endpoint=settings.azure_openai_endpoint
             )
             
             self.text_deployment = settings.azure_openai_text_deployment_name
@@ -71,7 +64,9 @@ class EnhancedMemeService:
             
             logger.info(f"Azure OpenAI Configuration:")
             logger.info(f"- Endpoint: {self.client.base_url}")
-            logger.info(f"- API Version: {self.client.api_version}")
+            # client may not expose api_version attribute depending on SDK
+            api_version = getattr(self.client, "api_version", settings.azure_openai_api_version)
+            logger.info(f"- API Version: {api_version}")
             logger.info(f"- Image Deployment: {self.image_deployment}")
             logger.info(f"Generating visual meme - Topic: {topic}, Mood: {mood}")
             logger.info(f"Image prompt: {image_prompt}")
@@ -83,12 +78,12 @@ class EnhancedMemeService:
             
             try:
                 logger.info("Attempting image generation with parameters:")
-                logger.info(f"- Model: {self.image_deployment}")
-                logger.info(f"- Base URL: {self.client.base_url}")
-                logger.info(f"- Headers: {self.client.default_headers}")
+                logger.info(f"- Deployment: {self.image_deployment}")
+                logger.info(f"- Endpoint: {settings.azure_openai_endpoint}")
+                logger.info(f"- API Version: {settings.azure_openai_api_version}")
                 
                 response = self.client.images.generate(
-                    model="gpt-image-1",  # Use model name directly
+                    model=self.image_deployment,  # Use deployment name for Azure
                     prompt=image_prompt,
                     n=1,
                     size="1024x1024",  # Standard size for memes
@@ -101,17 +96,25 @@ class EnhancedMemeService:
                 logger.error(f"Client configuration: {vars(self.client)}")
                 raise
             
-            if not response or not response.data:
+            if not response or not getattr(response, "data", None):
                 logger.error("No data in image generation response")
                 raise Exception("Empty response from image generation API")
                 
             logger.info(f"Image generation succeeded, response data: {response.data}")
-            image_url = response.data[0].url
-            if not image_url:
-                logger.error("Image URL is null in response")
-                raise Exception("No image URL in response")
-                
-            logger.info(f"Successfully generated image URL: {image_url}")
+            # GPT-image-1 returns base64 in b64_json, DALL-E may return a url.
+            first = response.data[0]
+            image_url = None
+            image_b64 = None
+            if hasattr(first, "url") and first.url:
+                image_url = first.url
+            elif hasattr(first, "b64_json") and first.b64_json:
+                image_b64 = first.b64_json
+                image_url = f"data:image/png;base64,{image_b64}"
+            else:
+                logger.error("No image url or base64 data in response item")
+                raise Exception("No image in response")
+            
+            logger.info(f"Successfully generated image (url length: {len(image_url) if image_url else 0})")
             
             logger.info("Visual meme generated successfully")
             
