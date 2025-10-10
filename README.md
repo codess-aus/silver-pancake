@@ -300,6 +300,7 @@ This project serves as a template for building AI applications that are safe, et
 
 **Built with ❤️ for responsible AI and team morale**
 
+Note: although it is an excellent app architechturally - GenAI Models are not very funny, so as Meme generators go... let's just say, it is better at creating images than jokes.
 ---
 
 *For the latest updates and announcements, watch this repository and check our [release notes](https://github.com/codess-aus/silver-pancake/releases).*
