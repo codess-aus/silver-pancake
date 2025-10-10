@@ -2,9 +2,9 @@
 
 > **Enterprise-grade AI meme generator with responsible AI guardrails for team morale and engagement**
 
-[![CI/CD Pipeline](https://github.com/codess-aus/silver-pancake/actions/workflows/main.yml/badge.svg)](https://github.com/codess-aus/silver-pancake/actions/workflows/main.yml)
-[![CodeQL Security](https://github.com/codess-aus/silver-pancake/actions/workflows/codeql.yml/badge.svg)](https://github.com/codess-aus/silver-pancake/actions/workflows/codeql.yml)
+[![Azure Static Web Apps CI/CD](https://github.com/codess-aus/silver-pancake/actions/workflows/azure-static-web-apps-jolly-wave-0222a6f03.yml/badge.svg)](https://github.com/codess-aus/silver-pancake/actions/workflows/azure-static-web-apps-jolly-wave-0222a6f03.yml)
 [![Responsible AI](https://img.shields.io/badge/Responsible%20AI-Enabled-green)](docs/responsible-ai.md)
+[![Live Demo](https://img.shields.io/badge/Demo-Live-blue)](https://jolly-wave-0222a6f03.2.azurestaticapps.net)
 
 Silver Pancake demonstrates how to build engaging AI applications with enterprise-grade safety, security, and responsible AI practices. Users can generate workplace-appropriate memes while sophisticated content moderation ensures professional suitability.
 
