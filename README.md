@@ -301,3 +301,4 @@ This project serves as a template for building AI applications that are safe, et
 ---
 
 *For the latest updates and announcements, watch this repository and check our [release notes](https://github.com/codess-aus/silver-pancake/releases).*
+# Trigger deployment with API URL
