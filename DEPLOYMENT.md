@@ -73,9 +73,9 @@ The backend is production-ready as-is. Key production features:
 1. **Create App Service**
 ```bash
 az webapp create \
-  --resource-group <your-rg> \
-  --plan <your-plan> \
-  --name <backend-app-name> \
+  --resource-group trustworthyai \
+  --plan meme-backend-plan \
+  --name silver-pancake \
   --runtime "PYTHON:3.12"
 ```
 
@@ -96,8 +96,8 @@ az webapp config appsettings set \
 ```bash
 cd backend
 az webapp up \
-  --resource-group <your-rg> \
-  --name <backend-app-name> \
+  --resource-group trustworthyai \
+  --name silver-pancake \
   --runtime "PYTHON:3.12"
 ```
 
@@ -116,7 +116,7 @@ az staticwebapp create \
 cd frontend/build
 az staticwebapp deploy \
   --name <frontend-app-name> \
-  --resource-group <your-rg> \
+  --resource-group trustworthyai \
   --app-location ./
 ```
 

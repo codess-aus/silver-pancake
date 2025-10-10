@@ -41,3 +41,13 @@ coverage/
 # OS generated files
 Thumbs.db
 .DS_Store
+
+# Deployment artifacts
+*.zip
+LogFiles/
+deployment.json
+deployment_operations.json
+publish-profile.xml
+backend/.azure/
+backend/LogFiles/
+backend/deployments/
