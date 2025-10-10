@@ -22,7 +22,7 @@ jobs:
           echo "REACT_APP_API_URL=https://${{ env.AZURE_WEBAPP_NAME }}.azurewebsites.net" >> $GITHUB_ENV
       
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v5
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
