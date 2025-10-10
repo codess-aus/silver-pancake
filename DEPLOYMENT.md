@@ -373,6 +373,18 @@ jobs:
         app-name: <backend-app-name>
         publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
         package: backend/
+
+### Azure Static Web Apps (using the provided workflow)
+
+This repo includes a preconfigured GitHub Actions workflow located at `.github/workflows/azure-static-web-app.yml`.
+
+1. In the Azure Portal create a Static Web App and connect your GitHub repo (or create the app and copy the deployment token).
+2. Add a repository secret named `AZURE_STATIC_WEB_APPS_API_TOKEN` with the deployment token value from Azure.
+3. The workflow will build the app from `frontend` and deploy the contents of `frontend/build` automatically on pushes to `main`.
+
+Notes:
+- If you create the Static Web App through the Azure Portal it may generate its own workflow. If you prefer to use the portal-generated workflow, compare the artifact path and app location and adjust as needed.
+- The workflow expects Node 20 to build the create-react-app-based frontend.
 ```
 
 ---
