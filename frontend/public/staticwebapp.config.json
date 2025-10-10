@@ -1,13 +1,7 @@
 {
-  "routes": [
-    {
-      "route": "/api/*",
-      "rewrite": "https://silver-pancake.azurewebsites.net/api/*"
-    }
-  ],
   "navigationFallback": {
     "rewrite": "/index.html",
-    "exclude": ["/images/*.{png,jpg,gif,svg}", "/css/*", "/api/*"]
+    "exclude": ["/images/*.{png,jpg,gif,svg}", "/css/*"]
   },
   "responseOverrides": {
     "404": {

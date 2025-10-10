@@ -32,7 +32,8 @@ const MemeGenerator = ({ onMemeGenerated, onError, isLoading, setIsLoading }) =>
     setIsLoading(true);
     
     try {
-      const response = await axios.post('/api/generate-visual-meme', {
+      const apiUrl = process.env.REACT_APP_API_URL || '/api';
+      const response = await axios.post(`${apiUrl}/generate-visual-meme`, {
         topic: topic.trim(),
         mood: mood,
         include_image: true,

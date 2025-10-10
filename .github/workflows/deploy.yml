@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 env:
-  AZURE_WEBAPP_NAME: meme-generator-backend
+  AZURE_WEBAPP_NAME: silver-pancake
   AZURE_STATICWEBAPP_NAME: meme-generator-frontend
   NODE_VERSION: '18.x'
   PYTHON_VERSION: '3.12'
@@ -16,6 +16,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - name: Set production API URL
+        if: github.ref == 'refs/heads/main'
+        run: |
+          echo "REACT_APP_API_URL=https://${{ env.AZURE_WEBAPP_NAME }}.azurewebsites.net" >> $GITHUB_ENV
       
       - name: Setup Node.js
         uses: actions/setup-node@v3
@@ -30,6 +34,8 @@ jobs:
       
       - name: Build frontend
         working-directory: ./frontend
+        env:
+          REACT_APP_API_URL: https://${{ env.AZURE_WEBAPP_NAME }}.azurewebsites.net
         run: npm run build
       
       - name: Upload build artifact
