@@ -8,6 +8,8 @@
 
 Silver Pancake demonstrates how to build engaging AI applications with enterprise-grade safety, security, and responsible AI practices. Users can generate workplace-appropriate memes while sophisticated content moderation ensures professional suitability.
 
+Access it here: https://jolly-wave-0222a6f03.2.azurestaticapps.net
+
 ## 🌟 Features
 
 ### ✨ AI-Powered Generation
